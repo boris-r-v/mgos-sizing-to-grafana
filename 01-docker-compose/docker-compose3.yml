@@ -1,0 +1,76 @@
+version: '3'
+
+services:
+  sqlserver2019:
+    image: mcr.microsoft.com/mssql/server:2019-CTP3.1-ubuntu
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: SqlServer2019!
+    ports:
+      - "41434:1433"
+    volumes:
+      - /home/renatogroffe/Desenvolvimento/Docker/Volumes/SQLSat/SQLServer2019-CTP3.1:/var/opt/mssql
+    networks:
+      - sqlsat
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: "Postgres2019!"
+    ports:
+      - "15432:5432"
+    volumes:
+      - /home/renatogroffe/Desenvolvimento/Docker/Volumes/SQLSat/PostgreSQL:/var/lib/postgresql/data 
+    networks:
+      - sqlsat
+      
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "renatogroff@yahoo.com.br"
+      PGADMIN_DEFAULT_PASSWORD: "PgAdmin2019!"
+    ports:
+      - "15433:80"
+    depends_on:
+      - postgres
+    networks:
+      - sqlsat
+
+  redis:
+    image: redis:alpine
+    command: redis-server --requirepass Redis2019!
+    ports:
+      - "16379:6379"
+    networks:
+      - sqlsat
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 19081:8081
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: renatogroffe
+      ME_CONFIG_BASICAUTH_PASSWORD: MongoExpress2019!
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: MongoDB2019!
+    links:
+      - mongo
+    networks:
+      - sqlsat
+
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: MongoDB2019!
+    ports:
+      - "27017:27017"
+    volumes:
+      - /home/renatogroffe/Desenvolvimento/Docker/Volumes/SQLSat/MongoDB:/data/db
+    networks:
+      - sqlsat    
+
+networks: 
+    sqlsat:
+      driver: bridge
